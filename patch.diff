@@ -1,0 +1,48 @@
+diff --git a/bindings/rust/src/ffi.rs b/bindings/rust/src/ffi.rs
+index a24523b..dbc86ff 100644
+--- a/bindings/rust/src/ffi.rs
++++ b/bindings/rust/src/ffi.rs
+@@ -15,7 +15,7 @@ extern "C" {
+     pub fn uc_arch_supported(arch: Arch) -> bool;
+     pub fn uc_open(arch: Arch, mode: Mode, engine: *mut uc_handle) -> uc_error;
+     pub fn uc_close(engine: uc_handle) -> uc_error;
+-    pub fn uc_free(mem: uc_context) -> uc_error;
++    pub fn uc_context_free(mem: uc_context) -> uc_error;
+     pub fn uc_errno(engine: uc_handle) -> uc_error;
+     pub fn uc_strerror(error_code: uc_error) -> *const c_char;
+     pub fn uc_reg_write(engine: uc_handle, regid: c_int, value: *const c_void) -> uc_error;
+diff --git a/bindings/rust/src/lib.rs b/bindings/rust/src/lib.rs
+index c67e434..d6f5583 100644
+--- a/bindings/rust/src/lib.rs
++++ b/bindings/rust/src/lib.rs
+@@ -63,7 +63,7 @@ impl Context {
+ 
+ impl Drop for Context {
+     fn drop(&mut self) {
+-        unsafe { ffi::uc_free(self.context) };
++        unsafe { ffi::uc_context_free(self.context) };
+     }
+ }
+ 
+@@ -736,7 +736,7 @@ impl<'a, D> UnicornHandle<'a, D> {
+                 context: new_context,
+             })
+         } else {
+-            unsafe { ffi::uc_free(new_context) };
++            unsafe { ffi::uc_context_free(new_context) };
+             Err(err)
+         }
+     }
+diff --git a/qemu/unicorn_common.h b/qemu/unicorn_common.h
+index f18d0b5..f33bf32 100644
+--- a/qemu/unicorn_common.h
++++ b/qemu/unicorn_common.h
+@@ -47,7 +47,7 @@ static void release_common(void *t)
+ 
+     // TODO(danghvu): these function is not available outside qemu
+     // so we keep them here instead of outside uc_close.
+-    phys_mem_clean(s->uc);
++    // phys_mem_clean(s->uc);
+     address_space_destroy(&(s->uc->as));
+     memory_free(s->uc);
+     tb_cleanup(s->uc);

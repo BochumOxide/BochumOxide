@@ -1,0 +1,27 @@
+Script = _{ SOI ~ AddExpr ~ EOF }
+
+ident = { 'a'..'z' | 'A'..'Z' | '0' .. '9' | '_'..'_' }
+
+
+// BoolOperation = { (CmpOperation ~ ( "||" | "&&" ) ~ BoolOperation ) | CmpOperation }
+// CmpOperation = { (AddOperation ~ ( "<=" | ">=" | "!=" | "==" | ">" | "<" ) ~ CmpOperation ) | AddOperation }
+AddOperator = { "+" | "-" }
+AddExpr = { ( MulExpr ~ AddOperator ~ AddExpr ) | MulExpr }
+
+MulOperator = { "*" | "/" | "%" }
+MulExpr = { ( BitExpr ~ MulOperator ~ MulExpr ) | BitExpr }
+
+BitOperator = { "|" | "&" | ">>" | "<<" | "^"}
+BitExpr = { ( UnaryExpr ~ BitOperator ~ BitExpr ) | UnaryExpr }
+
+UnaryOperator = { "~" | "-" | "+" }
+UnaryExpr = { ( UnaryOperator ~ UnaryExpr ) | Term }
+
+Term = _{ HexInt | DecInt | Register | "(" ~ AddExpr ~ ")" }
+
+DecInt = @{ ASCII_DIGIT+ }
+HexInt = @{ "0x" ~ ASCII_HEX_DIGIT+ }
+Register = @{ "$" ~ ident+ }
+
+WHITESPACE = _{ " " | "\t" }
+EOF = _{ EOI }

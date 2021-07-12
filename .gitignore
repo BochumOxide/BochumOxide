@@ -1,0 +1,7 @@
+/demo
+/target
+/ingredients
+/recipes
+.vscode
+*.log
+pwned
